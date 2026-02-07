@@ -1,0 +1,1 @@
+Clases que representan la información pura (POJOs/Data Classes). Ejemplo: Task.kt con id, título y fecha.
