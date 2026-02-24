@@ -16,49 +16,46 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.example.dailyfocus.data.model.Task
 
 @Composable
 fun TaskCard(
-    title : String,
-    description : String?,
-    checked : Boolean,
+    task: Task,
     onCheckedChange : (Boolean) -> Unit,
     modifier : Modifier = Modifier
 ) {
     ElevatedCard (
-        modifier = modifier.fillMaxWidth(),
-        shape = CardDefaults.elevatedShape,
-        colors = CardDefaults.elevatedCardColors(),
-        elevation = CardDefaults.elevatedCardElevation()
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .padding(all = 16.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
-                checked = checked,
+                checked = task.isCompleted,
                 onCheckedChange = onCheckedChange
             )
 
             Spacer(modifier = Modifier.width(width = 16.dp))
 
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.Start
-            ) {
+            Column {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = Bold
+                    text = task.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = Bold,
+                    textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null
                 )
-                Text(
-                    text = description ?: "No hay descripción",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+
+                task.description?.let { description ->
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }
