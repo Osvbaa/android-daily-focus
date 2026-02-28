@@ -10,6 +10,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.dailyfocus.ui.screens.DashboardMainScreen
+import com.example.dailyfocus.ui.screens.MainAppStructure
 import com.example.dailyfocus.ui.theme.DailyFocusTheme
 import com.example.dailyfocus.ui.screens.TaskScreen
 
@@ -19,18 +21,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DailyFocusTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    TaskScreen(modifier = Modifier.padding(innerPadding))
-                }
+                MainAppStructure()
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    DailyFocusTheme {
-        TaskScreen(modifier = Modifier)
     }
 }
