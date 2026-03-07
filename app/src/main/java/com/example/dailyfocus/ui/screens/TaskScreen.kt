@@ -1,5 +1,6 @@
 package com.example.dailyfocus.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,10 @@ import androidx.compose.ui.unit.dp
 import com.example.dailyfocus.ui.components.TaskCard
 import java.time.format.DateTimeFormatter
 import com.example.dailyfocus.data.model.Task
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlin.collections.groupBy
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +59,8 @@ fun TaskScreen(modifier : Modifier = Modifier) {
                 // Formateamos la fecha a String para usarla como separador visual
                 task.createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
             }
+                .mapValues { it.value.toImmutableList() } // Convierte cada lista interna
+                .toImmutableMap() // Convierte el mapa resultante
         }
     }
 
@@ -69,9 +76,10 @@ fun TaskScreen(modifier : Modifier = Modifier) {
     )
 
 }
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HeaderSection(
-    groupedTasks: Map<String, List<Task>>,
+    groupedTasks: ImmutableMap<String, ImmutableList<Task>>,
     onTaskCheckedChange: (Task, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
