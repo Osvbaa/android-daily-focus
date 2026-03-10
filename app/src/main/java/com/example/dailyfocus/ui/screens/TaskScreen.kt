@@ -12,17 +12,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dailyfocus.ui.components.TaskCard
@@ -36,22 +44,11 @@ import kotlin.collections.groupBy
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskScreen(modifier : Modifier = Modifier) {
-    val tasks = remember {
-        mutableStateListOf(
-            Task(title = "Aprender LazyLayouts", description = "Entender keys"),
-            Task(title = "Refactorizar Daily Focus", isCompleted = true),
-            Task(title = "Entender Inmutabilidad", description = "Usar @Immutable"),
-            Task(title = "Aprender Inglés", description = "Practicar nuevo vocabulario"),
-            Task(title = "Practicar speaking", description = "Hablar por 5 minutos en inglés"),
-            Task(title = "Aprender a utilizar LazyLists"),
-            Task(title = "Hacer tarea", isCompleted = true),
-            Task(title = "Estudiar Android", description = "Practicar conceptos nuevos"),
-            Task(title = "Leer", description = "Leer libros por 5 minutos en inglés"),
-            Task(title = "Trabajar sobre Daily Focus"),
-            Task(title = "Limpiar el cuarto", isCompleted = true)
-        )
-    }
+fun TaskScreen(
+    tasks: MutableList<Task>,
+    onDeleteTask: (Task) -> Unit,
+    modifier : Modifier = Modifier
+) {
 
     val groupedTasks by remember {
         derivedStateOf {
@@ -72,15 +69,16 @@ fun TaskScreen(modifier : Modifier = Modifier) {
                 tasks[index] = tasks[index].copy(isCompleted = isChecked)
             }
         },
-        modifier = Modifier.padding(all = 12.dp)
+        onDelete = onDeleteTask,
+        modifier = modifier.padding(all = 12.dp)
     )
-
 }
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HeaderSection(
     groupedTasks: ImmutableMap<String, ImmutableList<Task>>,
     onTaskCheckedChange: (Task, Boolean) -> Unit,
+    onDelete: (Task) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -102,7 +100,10 @@ private fun HeaderSection(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = MaterialTheme.colorScheme.primary)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = MaterialTheme.shapes.medium
+                        )
                         .padding(all = 8.dp)
                 ) {
                     Text(
@@ -118,19 +119,63 @@ private fun HeaderSection(
                 key = { task -> task.id },
                 contentType = { "task_item" }
             ) { task ->
-                TaskCard(
+                TaskCardSwipe(
                     task = task,
-                    onCheckedChange = { newState ->
-                        onTaskCheckedChange(task, newState)
-                    }
+                    onTaskCheckedChange = onTaskCheckedChange,
+                    onDelete = onDelete,
+                    modifier = Modifier.animateItem()
                 )
             }
         }
     }
 }
-
-@Preview(showBackground = true)
 @Composable
-fun TaskScreenPreview() {
-    TaskScreen()
+fun TaskCardSwipe(
+    task: Task,
+    onTaskCheckedChange: (Task, Boolean) -> Unit,
+    onDelete: (Task) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                onDelete(task)
+                true
+            } else false
+        }
+    ) //el estado del deslizamiento
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = { DismissBackground(dismissState) },
+        enableDismissFromEndToStart = true,
+        enableDismissFromStartToEnd = false,
+        modifier = modifier
+    ) {
+        TaskCard(
+            task = task,
+            onCheckedChange = { newState ->
+                onTaskCheckedChange(task, newState)
+            }
+        )
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DismissBackground(dismissState: SwipeToDismissBoxState) {
+    val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+        Color.Red
+    } else {
+        Color.Transparent
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color)
+            .padding(all = 16.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.White)
+    }
 }
