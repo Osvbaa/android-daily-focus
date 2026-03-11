@@ -15,18 +15,10 @@ import com.example.dailyfocus.data.model.StatItem
 import com.example.dailyfocus.ui.components.Dashboard
 
 @Composable
-fun DashboardMainScreen(modifier: Modifier = Modifier) {
-    val dashboardItems = remember {
-        mutableStateListOf(
-            StatItem(title = "Tasks", value = "15"),
-            StatItem(title = "Completed", value = "5"),
-            StatItem(title = "To Do", value = "5"),
-            StatItem(title = "In Progress", value = "2"),
-            StatItem(title = "Overdue", value = "1"),
-            StatItem(title = "Upcoming", value = "1")
-        )
-    }
-
+fun DashboardMainScreen(
+    stats: List<StatItem>,
+    modifier: Modifier = Modifier
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(count = 2),
         modifier = modifier
@@ -36,7 +28,7 @@ fun DashboardMainScreen(modifier: Modifier = Modifier) {
 
     ) {
         items(
-            items = dashboardItems,
+            items = stats,
             key = { item -> item.id },
             contentType = { "stat_type" }
         ) { item ->
@@ -45,11 +37,6 @@ fun DashboardMainScreen(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DashboardScreenPreview() {
-    DashboardMainScreen()
-}
 
 
 

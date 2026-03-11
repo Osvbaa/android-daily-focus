@@ -56,7 +56,7 @@ fun TaskScreen(
                 // Formateamos la fecha a String para usarla como separador visual
                 task.createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
             }
-                .mapValues { it.value.toImmutableList() } // Convierte cada lista interna
+                .mapValues { it.value.toImmutableList() } // Convierte cada elemento de la lista a un ImmutableList
                 .toImmutableMap() // Convierte el mapa resultante
         }
     }
@@ -76,10 +76,10 @@ fun TaskScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HeaderSection(
-    groupedTasks: ImmutableMap<String, ImmutableList<Task>>,
-    onTaskCheckedChange: (Task, Boolean) -> Unit,
-    onDelete: (Task) -> Unit,
-    modifier: Modifier = Modifier
+    groupedTasks : ImmutableMap<String, ImmutableList<Task>>,
+    onTaskCheckedChange : (Task, Boolean) -> Unit,
+    onDelete : (Task) -> Unit,
+    modifier : Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
@@ -88,7 +88,10 @@ private fun HeaderSection(
     ) {
         item {
             Spacer(modifier = Modifier.height(height = 12.dp))
-            Text(text = "Daily Focus", style = MaterialTheme.typography.headlineLarge)
+            Text(
+                text = "Daily Focus",
+                style = MaterialTheme.typography.headlineLarge
+            )
             Spacer(modifier = Modifier.height(height = 16.dp))
         }
 
@@ -131,10 +134,10 @@ private fun HeaderSection(
 }
 @Composable
 fun TaskCardSwipe(
-    task: Task,
-    onTaskCheckedChange: (Task, Boolean) -> Unit,
-    onDelete: (Task) -> Unit,
-    modifier: Modifier = Modifier
+    task : Task,
+    onTaskCheckedChange : (Task, Boolean) -> Unit,
+    onDelete : (Task) -> Unit,
+    modifier : Modifier = Modifier
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->

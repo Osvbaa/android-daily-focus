@@ -23,7 +23,6 @@ fun Dashboard(
     stats: StatItem,
     modifier: Modifier = Modifier
 ) {
-
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth(),

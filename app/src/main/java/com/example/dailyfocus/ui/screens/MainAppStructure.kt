@@ -16,6 +16,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.example.dailyfocus.data.model.StatItem
 import com.example.dailyfocus.data.model.Task
 import kotlinx.coroutines.launch
 
@@ -45,11 +47,25 @@ fun MainAppStructure() {
         )
     }
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    val dashboardStats by remember {
+        derivedStateOf {
+            val total = tasks.size
+            val completed = tasks.count { it.isCompleted }
+            val pending = total - completed
 
-    val coroutineScope = rememberCoroutineScope()
+            listOf(
+                StatItem(title = "Total tareas", value = total.toString()),
+                StatItem(title = "Completadas", value = completed.toString()),
+                StatItem(title = "Pendientes", value = pending.toString())
+            )
+        }
+    }
 
-    var currentScreen by remember { mutableStateOf(value = "Tasks") }
+    val snackbarHostState = remember { SnackbarHostState() } // Estado para el Snackbar
+
+    val coroutineScope = rememberCoroutineScope() // Alcance para las corrutinas
+
+    var currentScreen by remember { mutableStateOf(value = "Tasks") } // Estado para la pantalla actual
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -71,7 +87,7 @@ fun MainAppStructure() {
             }
         },
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackbarHostState) // Componente para mostrar el Snackbar
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -98,7 +114,9 @@ fun MainAppStructure() {
                         }
                     }
                 )
-                "Dashboard" -> DashboardMainScreen()
+                "Dashboard" -> DashboardMainScreen(
+                    stats = dashboardStats
+                )
             }
         }
     }
