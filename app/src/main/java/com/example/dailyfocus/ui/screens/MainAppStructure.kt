@@ -19,14 +19,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.dailyfocus.data.model.StatItem
 import com.example.dailyfocus.data.model.Task
+import com.example.dailyfocus.ui.navigation.TaskRoute
 import kotlinx.coroutines.launch
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import com.example.dailyfocus.ui.navigation.DashboardRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,22 +70,31 @@ fun MainAppStructure() {
 
     val coroutineScope = rememberCoroutineScope() // Alcance para las corrutinas
 
-    var currentScreen by remember { mutableStateOf(value = "Tasks") } // Estado para la pantalla actual
+    /*
+    // Estado para la pantalla actual utilizando texto (sin Navigation)
+    var currentScreen by remember { mutableStateOf(value = "Tasks") }
+    */
+
+    // Estado para la pantalla actual utilizando Navigation
+    val navController = rememberNavController()
+    // El observador que nos dice en qué destino estamos actualmente
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
-                    selected = currentScreen == "Tasks",
-                    onClick = { currentScreen = "Tasks" },
+                    selected = currentDestination?.hasRoute<TaskRoute>() == true,
+                    onClick = { navController.navigate(route = TaskRoute) },
                     icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = "Tasks")},
                     label = { Text(text = "Tasks") },
                 )
 
                 NavigationBarItem(
-                    selected = currentScreen == "Dashboard",
-                    onClick = { currentScreen = "Dashboard" },
+                    selected = currentDestination?.hasRoute<DashboardRoute>() == true,
+                    onClick = { navController.navigate(route = DashboardRoute) },
                     icon = { Icon(imageVector = Icons.Default.Info, contentDescription = "Estadísticas") },
                     label = { Text("Statistics") }
                 )
@@ -91,32 +105,40 @@ fun MainAppStructure() {
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            when (currentScreen) {
-                "Tasks" -> TaskScreen(
-                    tasks = tasks,
-                    onDeleteTask = { taskToDelete ->
-                        val index = tasks.indexOfFirst { it.id == taskToDelete.id } // Guardo el índice exacto antes de eliminar (para el Deshacer)
+            NavHost(
+                navController = navController,
+                startDestination = TaskRoute
+            ) {
+                //Nodo 1: La pantalla de las tareas
+                composable<TaskRoute> {
+                    TaskScreen(
+                        tasks = tasks,
+                        onDeleteTask = { taskToDelete ->
+                            val index = tasks.indexOfFirst { it.id == taskToDelete.id } // Guardo el índice exacto antes de eliminar (para el Deshacer)
 
-                        if (index != -1) {
-                            val removedTask = tasks[index]
-                            tasks.removeAt(index = index)
+                            if (index != -1) {
+                                val removedTask = tasks[index]
+                                tasks.removeAt(index = index)
 
-                            coroutineScope.launch {
-                                val result = snackbarHostState.showSnackbar(
-                                    message = "Tarea eliminada",
-                                    actionLabel = "Deshacer"
-                                )
+                                coroutineScope.launch {
+                                    val result = snackbarHostState.showSnackbar(
+                                        message = "Tarea eliminada",
+                                        actionLabel = "Deshacer"
+                                    )
 
-                                if (result == SnackbarResult.ActionPerformed) {
-                                    tasks.add(index, element = removedTask)
+                                    if (result == SnackbarResult.ActionPerformed) {
+                                        tasks.add(index, element = removedTask)
+                                    }
                                 }
                             }
                         }
-                    }
-                )
-                "Dashboard" -> DashboardMainScreen(
-                    stats = dashboardStats
-                )
+                    )
+                }
+
+                //Nodo 2: La pantalla de las estadísticas
+                composable<DashboardRoute> {
+                    DashboardMainScreen(stats = dashboardStats)
+                }
             }
         }
     }
