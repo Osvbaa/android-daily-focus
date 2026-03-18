@@ -77,8 +77,10 @@ fun MainAppStructure() {
 
     // Estado para la pantalla actual utilizando Navigation
     val navController = rememberNavController()
-    // El observador que nos dice en qué destino estamos actualmente
+    // Obtenemos el BackStackEntry actual y lo convertimos en estado para la recomposición
+    // con currentBackStackEntryAsState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    // navBackStackEntry tiene información que no nos es útil, entonces extraemos solo el destino
     val currentDestination = navBackStackEntry?.destination
 
     Scaffold(
@@ -86,7 +88,9 @@ fun MainAppStructure() {
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
+                    // hasRoute verifica si el destino actual tiene la ruta especificada
                     selected = currentDestination?.hasRoute<TaskRoute>() == true,
+                    // utilizamos navigate en el navController para navegar a la ruta
                     onClick = { navController.navigate(route = TaskRoute) },
                     icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = "Tasks")},
                     label = { Text(text = "Tasks") },
@@ -110,6 +114,8 @@ fun MainAppStructure() {
                 startDestination = TaskRoute
             ) {
                 //Nodo 1: La pantalla de las tareas
+                //composable es una función constructura que pertenece a NavGraphBuilder
+                //su función es registrar un "nodo" en el mapa topológico del NavHost
                 composable<TaskRoute> {
                     TaskScreen(
                         tasks = tasks,
