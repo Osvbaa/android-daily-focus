@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxDefaults
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -139,14 +140,14 @@ fun TaskCardSwipe(
     onDelete : (Task) -> Unit,
     modifier : Modifier = Modifier
 ) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart) {
-                onDelete(task)
-                true
-            } else false
+    val dismissState = rememberSwipeToDismissBoxState()
+
+    // Observamos el cambio de estado para ejecutar la acción de borrado
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onDelete(task)
         }
-    ) //el estado del deslizamiento
+    }
 
     SwipeToDismissBox(
         state = dismissState,
