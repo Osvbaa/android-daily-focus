@@ -29,6 +29,7 @@ import com.example.dailyfocus.data.model.Task
 import com.example.dailyfocus.ui.navigation.TaskRoute
 import kotlinx.coroutines.launch
 import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.dailyfocus.ui.navigation.DashboardRoute
@@ -91,14 +92,33 @@ fun MainAppStructure() {
                     // hasRoute verifica si el destino actual tiene la ruta especificada
                     selected = currentDestination?.hasRoute<TaskRoute>() == true,
                     // utilizamos navigate en el navController para navegar a la ruta
-                    onClick = { navController.navigate(route = TaskRoute) },
+                    onClick = {
+                        navController.navigate(route = TaskRoute) {
+                            //limpia la pila hasta la ruta de inicio
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true // guarda el scroll/estado actual de la pantalla
+                            }
+                            //evita multiples copias de la misma pantalla
+                            launchSingleTop = true
+                            //restaura el estado si la pantalla ya está en la pila
+                            restoreState = true
+                        }
+                    },
                     icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = "Tasks")},
                     label = { Text(text = "Tasks") },
                 )
 
                 NavigationBarItem(
                     selected = currentDestination?.hasRoute<DashboardRoute>() == true,
-                    onClick = { navController.navigate(route = DashboardRoute) },
+                    onClick = {
+                        navController.navigate(route = DashboardRoute) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     icon = { Icon(imageVector = Icons.Default.Info, contentDescription = "Estadísticas") },
                     label = { Text("Statistics") }
                 )
