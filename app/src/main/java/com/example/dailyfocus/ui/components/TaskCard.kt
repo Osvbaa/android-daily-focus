@@ -22,6 +22,7 @@ import com.example.dailyfocus.data.model.Task
 fun TaskCard(
     task: Task,
     onCheckedChange : (Boolean) -> Unit,
+    onTaskClick : (String) -> Unit,
     modifier : Modifier = Modifier
 ) {
     ElevatedCard (
