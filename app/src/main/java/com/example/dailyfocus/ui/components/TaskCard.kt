@@ -1,5 +1,6 @@
 package com.example.dailyfocus.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,7 +27,9 @@ fun TaskCard(
     modifier : Modifier = Modifier
 ) {
     ElevatedCard (
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onTaskClick("ID_FAlSO_111") }
     ) {
         Row(
             modifier = Modifier

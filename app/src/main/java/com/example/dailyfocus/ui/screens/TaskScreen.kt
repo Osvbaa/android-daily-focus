@@ -46,11 +46,11 @@ import kotlin.collections.groupBy
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskScreen(
-    tasks: MutableList<Task>,
-    onDeleteTask: (Task) -> Unit,
+    tasks : MutableList<Task>,
+    onDeleteTask : (Task) -> Unit,
+    onTaskClick : (String) -> Unit,
     modifier : Modifier = Modifier
 ) {
-
     val groupedTasks by remember {
         derivedStateOf {
             tasks.groupBy { task ->
@@ -62,7 +62,7 @@ fun TaskScreen(
         }
     }
 
-    HeaderSection(
+    TaskList(
         groupedTasks = groupedTasks,
         onTaskCheckedChange = { task, isChecked ->
             val index = tasks.indexOfFirst { it.id == task.id }
@@ -71,15 +71,17 @@ fun TaskScreen(
             }
         },
         onDelete = onDeleteTask,
+        onTaskClick = onTaskClick,
         modifier = modifier.padding(all = 12.dp)
     )
 }
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HeaderSection(
+private fun TaskList(
     groupedTasks : ImmutableMap<String, ImmutableList<Task>>,
     onTaskCheckedChange : (Task, Boolean) -> Unit,
     onDelete : (Task) -> Unit,
+    onTaskClick : (String) -> Unit,
     modifier : Modifier = Modifier
 ) {
     LazyColumn(
@@ -127,6 +129,7 @@ private fun HeaderSection(
                     task = task,
                     onTaskCheckedChange = onTaskCheckedChange,
                     onDelete = onDelete,
+                    onTaskClick = onTaskClick,
                     modifier = Modifier.animateItem()
                 )
             }
@@ -138,14 +141,22 @@ fun TaskCardSwipe(
     task : Task,
     onTaskCheckedChange : (Task, Boolean) -> Unit,
     onDelete : (Task) -> Unit,
+    onTaskClick : (String) -> Unit,
     modifier : Modifier = Modifier
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
 
-    // Observamos el cambio de estado para ejecutar la acción de borrado
-    LaunchedEffect(dismissState.currentValue) {
-        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+    LaunchedEffect(task.id) {//nos aseguramos que la tarea entra en Settled cuando entra a la recomposición
+        if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+            dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+        }
+    }
+
+    // Solo ejecutamos onDelete si el estado cambia a EndToStart
+    LaunchedEffect(dismissState.targetValue) {
+        if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) {
             onDelete(task)
+            dismissState.snapTo(SwipeToDismissBoxValue.Settled)
         }
     }
 
@@ -160,7 +171,8 @@ fun TaskCardSwipe(
             task = task,
             onCheckedChange = { newState ->
                 onTaskCheckedChange(task, newState)
-            }
+            },
+            onTaskClick = onTaskClick
         )
     }
 }

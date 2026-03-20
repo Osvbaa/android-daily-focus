@@ -32,7 +32,9 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.example.dailyfocus.ui.navigation.DashboardRoute
+import com.example.dailyfocus.ui.navigation.TaskDetailRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,13 +159,24 @@ fun MainAppStructure() {
                                     }
                                 }
                             }
+                        },
+                        onTaskClick = { clickedTaskId ->
+                            navController.navigate(route = TaskDetailRoute(taskId = clickedTaskId))
                         }
                     )
                 }
-
                 //Nodo 2: La pantalla de las estadísticas
                 composable<DashboardRoute> {
                     DashboardMainScreen(stats = dashboardStats)
+                }
+                //Nodo 3: La pantalla de detalles/edición de tareas
+                composable<TaskDetailRoute> { backStackEntry ->
+                    //deserializamos el parámetro de la ruta
+                    val route = backStackEntry.toRoute<TaskDetailRoute>()
+
+                    TaskDetailScreen(taskId = route.taskId) {
+                        navController.popBackStack()
+                    }
                 }
             }
         }
