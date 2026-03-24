@@ -21,12 +21,12 @@ import com.example.dailyfocus.data.model.Task
 
 @Composable
 fun TaskCard(
-    task: Task,
+    task : Task,
     onCheckedChange : (Boolean) -> Unit,
     onTaskClick : (String) -> Unit,
     modifier : Modifier = Modifier
 ) {
-    ElevatedCard (
+    ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onTaskClick("ID_FAlSO_111") }

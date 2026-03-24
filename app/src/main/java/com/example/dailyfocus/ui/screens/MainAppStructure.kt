@@ -130,7 +130,7 @@ fun MainAppStructure() {
             SnackbarHost(hostState = snackbarHostState) // Componente para mostrar el Snackbar
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(modifier = Modifier.padding(paddingValues = innerPadding)) {
             NavHost(
                 navController = navController,
                 startDestination = TaskRoute
@@ -142,7 +142,7 @@ fun MainAppStructure() {
                     TaskScreen(
                         tasks = tasks,
                         onDeleteTask = { taskToDelete ->
-                            val index = tasks.indexOfFirst { it.id == taskToDelete.id } // Guardo el índice exacto antes de eliminar (para el Deshacer)
+                            val index = tasks.indexOfFirst { task -> task.id == taskToDelete.id } // Guardo el índice exacto antes de eliminar (para el Deshacer)
 
                             if (index != -1) {
                                 val removedTask = tasks[index]

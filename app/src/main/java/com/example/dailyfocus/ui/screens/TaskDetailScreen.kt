@@ -35,7 +35,7 @@ fun TaskDetailScreen(taskId: String, onNavigateBack: () -> Unit) {
         }
     ) { padding ->
         Box(
-            modifier = Modifier.padding(padding).fillMaxSize(),
+            modifier = Modifier.padding(paddingValues = padding).fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             Text(

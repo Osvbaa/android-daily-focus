@@ -18,7 +18,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxDefaults
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -27,12 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dailyfocus.ui.components.TaskCard
 import java.time.format.DateTimeFormatter
@@ -57,7 +54,7 @@ fun TaskScreen(
                 // Formateamos la fecha a String para usarla como separador visual
                 task.createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
             }
-                .mapValues { it.value.toImmutableList() } // Convierte cada elemento de la lista a un ImmutableList
+                .mapValues { valueOfTask -> valueOfTask.value.toImmutableList() } // Convierte cada elemento de la lista a un ImmutableList
                 .toImmutableMap() // Convierte el mapa resultante
         }
     }
@@ -65,12 +62,12 @@ fun TaskScreen(
     TaskList(
         groupedTasks = groupedTasks,
         onTaskCheckedChange = { task, isChecked ->
-            val index = tasks.indexOfFirst { it.id == task.id }
+            val index = tasks.indexOfFirst { taskChanged -> taskChanged.id == task.id }
             if (index != -1) {
                 tasks[index] = tasks[index].copy(isCompleted = isChecked)
             }
         },
-        onDelete = onDeleteTask,
+        onDeleteTask = onDeleteTask,
         onTaskClick = onTaskClick,
         modifier = modifier.padding(all = 12.dp)
     )
@@ -80,7 +77,7 @@ fun TaskScreen(
 private fun TaskList(
     groupedTasks : ImmutableMap<String, ImmutableList<Task>>,
     onTaskCheckedChange : (Task, Boolean) -> Unit,
-    onDelete : (Task) -> Unit,
+    onDeleteTask : (Task) -> Unit,
     onTaskClick : (String) -> Unit,
     modifier : Modifier = Modifier
 ) {
@@ -128,7 +125,7 @@ private fun TaskList(
                 TaskCardSwipe(
                     task = task,
                     onTaskCheckedChange = onTaskCheckedChange,
-                    onDelete = onDelete,
+                    onDeleteTask = onDeleteTask,
                     onTaskClick = onTaskClick,
                     modifier = Modifier.animateItem()
                 )
@@ -140,23 +137,23 @@ private fun TaskList(
 fun TaskCardSwipe(
     task : Task,
     onTaskCheckedChange : (Task, Boolean) -> Unit,
-    onDelete : (Task) -> Unit,
+    onDeleteTask: (Task) -> Unit,
     onTaskClick : (String) -> Unit,
     modifier : Modifier = Modifier
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
 
-    LaunchedEffect(task.id) {//nos aseguramos que la tarea entra en Settled cuando entra a la recomposición
+    LaunchedEffect(key1 = task.id) {//nos aseguramos que la tarea entra en Settled cuando entra a la recomposición
         if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-            dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+            dismissState.snapTo(targetValue = SwipeToDismissBoxValue.Settled)
         }
     }
 
     // Solo ejecutamos onDelete si el estado cambia a EndToStart
-    LaunchedEffect(dismissState.targetValue) {
+    LaunchedEffect(key1 = dismissState.targetValue) {
         if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) {
-            onDelete(task)
-            dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+            onDeleteTask(task)
+            dismissState.snapTo(targetValue = SwipeToDismissBoxValue.Settled)
         }
     }
 
