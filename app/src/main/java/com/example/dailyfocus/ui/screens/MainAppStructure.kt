@@ -21,18 +21,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.example.dailyfocus.data.model.StatItem
 import com.example.dailyfocus.data.model.Task
 import com.example.dailyfocus.ui.navigation.TaskRoute
 import kotlinx.coroutines.launch
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import com.example.dailyfocus.ui.navigation.DashboardRoute
 import com.example.dailyfocus.ui.navigation.TaskDetailRoute
 
@@ -79,12 +76,7 @@ fun MainAppStructure() {
     */
 
     // Estado para la pantalla actual utilizando Navigation
-    val navController = rememberNavController()
-    // Obtenemos el BackStackEntry actual y lo convertimos en estado para la recomposición
-    // con currentBackStackEntryAsState()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    // navBackStackEntry tiene información que no nos es útil, entonces extraemos solo el destino
-    val currentDestination = navBackStackEntry?.destination
+    val backStack = rememberNavBackStack(TaskRoute)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -92,18 +84,12 @@ fun MainAppStructure() {
             NavigationBar {
                 NavigationBarItem(
                     // hasRoute verifica si el destino actual tiene la ruta especificada
-                    selected = currentDestination?.hasRoute<TaskRoute>() == true,
+                    selected = backStack.lastOrNull() is TaskRoute,
                     // utilizamos navigate en el navController para navegar a la ruta
                     onClick = {
-                        navController.navigate(route = TaskRoute) {
-                            //limpia la pila hasta la ruta de inicio
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true // guarda el scroll/estado actual de la pantalla
-                            }
-                            //evita multiples copias de la misma pantalla
-                            launchSingleTop = true
-                            //restaura el estado si la pantalla ya está en la pila
-                            restoreState = true
+                        if (backStack.lastOrNull() !is TaskRoute) {
+                            backStack.clear()
+                            backStack.add(TaskRoute)
                         }
                     },
                     icon = { Icon(imageVector = Icons.Default.Edit, contentDescription = "Tasks")},
@@ -111,14 +97,11 @@ fun MainAppStructure() {
                 )
 
                 NavigationBarItem(
-                    selected = currentDestination?.hasRoute<DashboardRoute>() == true,
+                    selected = backStack.lastOrNull() is DashboardRoute,
                     onClick = {
-                        navController.navigate(route = DashboardRoute) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
+                        if (backStack.lastOrNull() !is DashboardRoute) {
+                            backStack.removeIf { currentBackStack -> currentBackStack !is TaskRoute }
+                            backStack.add(DashboardRoute)
                         }
                     },
                     icon = { Icon(imageVector = Icons.Default.Info, contentDescription = "Estadísticas") },
@@ -131,6 +114,54 @@ fun MainAppStructure() {
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(paddingValues = innerPadding)) {
+            
+            NavDisplay(
+                backStack = backStack,
+            ) { key ->
+                when(key) {
+                    is TaskRoute ->
+                        NavEntry(key) {
+                            TaskScreen(
+                                tasks = tasks,
+                                onDeleteTask = { taskToDelete ->
+                                    val index = tasks.indexOfFirst { task -> task.id == taskToDelete.id } // Guardo el índice exacto antes de eliminar (para el Deshacer)
+
+                                    if (index != -1) {
+                                        val removedTask = tasks[index]
+                                        tasks.removeAt(index = index)
+
+                                        coroutineScope.launch {
+                                            val result = snackbarHostState.showSnackbar(
+                                                message = "Tarea eliminada",
+                                                actionLabel = "Deshacer"
+                                            )
+
+                                            if (result == SnackbarResult.ActionPerformed) {
+                                                tasks.add(index, element = removedTask)
+                                            }
+                                        }
+                                    }
+                                },
+                                onTaskClick = { clickedTaskId ->
+                                    backStack.add(TaskDetailRoute(taskId = clickedTaskId))
+                                }
+                            )
+                        }
+                    is DashboardRoute ->
+                        NavEntry(key) {
+                            DashboardMainScreen(stats = dashboardStats)
+                        }
+                    is TaskDetailRoute ->
+                        NavEntry(key) {
+                            TaskDetailScreen(taskId = key.taskId) {
+                                backStack.removeLastOrNull()
+                            }
+                        }
+                    else -> error("Unknown key $key")
+                }
+            }
+            /*
+            Navigation 2
             NavHost(
                 navController = navController,
                 startDestination = TaskRoute
@@ -178,7 +209,7 @@ fun MainAppStructure() {
                         navController.popBackStack()
                     }
                 }
-            }
+            }*/
         }
     }
 }
