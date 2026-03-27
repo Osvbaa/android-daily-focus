@@ -4,16 +4,20 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.automirrored.filled.PlaylistAddCheck
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,97 +33,76 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.dailyfocus.ui.components.TaskCard
-import java.time.format.DateTimeFormatter
 import com.example.dailyfocus.data.model.Task
+import com.example.dailyfocus.ui.components.TaskCard
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
-import kotlin.collections.groupBy
+import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskScreen(
-    tasks : MutableList<Task>,
-    onDeleteTask : (Task) -> Unit,
-    onTaskClick : (String) -> Unit,
-    modifier : Modifier = Modifier
+    tasks: MutableList<Task>,
+    onDeleteTask: (Task) -> Unit,
+    onTaskClick: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val groupedTasks by remember {
         derivedStateOf {
             tasks.groupBy { task ->
-                // Formateamos la fecha a String para usarla como separador visual
-                task.createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                task.createdAt.format(DateTimeFormatter.ofPattern("EEEE, d MMMM"))
             }
-                .mapValues { valueOfTask -> valueOfTask.value.toImmutableList() } // Convierte cada elemento de la lista a un ImmutableList
-                .toImmutableMap() // Convierte el mapa resultante
+                .mapValues { it.value.toImmutableList() }
+                .toImmutableMap()
         }
     }
 
     TaskList(
         groupedTasks = groupedTasks,
         onTaskCheckedChange = { task, isChecked ->
-            val index = tasks.indexOfFirst { taskChanged -> taskChanged.id == task.id }
+            val index = tasks.indexOfFirst { it.id == task.id }
             if (index != -1) {
                 tasks[index] = tasks[index].copy(isCompleted = isChecked)
             }
         },
         onDeleteTask = onDeleteTask,
         onTaskClick = onTaskClick,
-        modifier = modifier.padding(all = 12.dp)
+        modifier = modifier
     )
 }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TaskList(
-    groupedTasks : ImmutableMap<String, ImmutableList<Task>>,
-    onTaskCheckedChange : (Task, Boolean) -> Unit,
-    onDeleteTask : (Task) -> Unit,
-    onTaskClick : (String) -> Unit,
-    modifier : Modifier = Modifier
+    groupedTasks: ImmutableMap<String, ImmutableList<Task>>,
+    onTaskCheckedChange: (Task, Boolean) -> Unit,
+    onDeleteTask: (Task) -> Unit,
+    onTaskClick: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(all = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(space = 8.dp)
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            Spacer(modifier = Modifier.height(height = 12.dp))
-            Text(
-                text = "Daily Focus",
-                style = MaterialTheme.typography.headlineLarge
-            )
-            Spacer(modifier = Modifier.height(height = 16.dp))
+            HeaderSection()
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         groupedTasks.forEach { (dateHeader, tasksForDate) ->
-            stickyHeader(
-                key = "header_$dateHeader", // Identidad única para la Slot Table
-                contentType = "header_type" // Molde para reciclaje en memoria
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = MaterialTheme.shapes.medium
-                        )
-                        .padding(all = 8.dp)
-                ) {
-                    Text(
-                        text = dateHeader,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
-                }
+            stickyHeader(key = "header_$dateHeader") {
+                DateHeader(dateHeader)
             }
 
             items(
                 items = tasksForDate,
-                key = { task -> task.id },
+                key = { it.id },
                 contentType = { "task_item" }
             ) { task ->
                 TaskCardSwipe(
@@ -133,27 +116,86 @@ private fun TaskList(
         }
     }
 }
+
+@Composable
+private fun HeaderSection() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = "Mis Tareas",
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Organiza tu enfoque diario",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.PlaylistAddCheck,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+    }
+}
+
+@Composable
+private fun DateHeader(date: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(vertical = 8.dp)
+    ) {
+        Text(
+            text = date.replaceFirstChar { it.uppercase() },
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    shape = MaterialTheme.shapes.small
+                )
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskCardSwipe(
-    task : Task,
-    onTaskCheckedChange : (Task, Boolean) -> Unit,
+    task: Task,
+    onTaskCheckedChange: (Task, Boolean) -> Unit,
     onDeleteTask: (Task) -> Unit,
-    onTaskClick : (String) -> Unit,
-    modifier : Modifier = Modifier
+    onTaskClick: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
 
-    LaunchedEffect(key1 = task.id) {//nos aseguramos que la tarea entra en Settled cuando entra a la recomposición
+    LaunchedEffect(task.id) {
         if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-            dismissState.snapTo(targetValue = SwipeToDismissBoxValue.Settled)
+            dismissState.snapTo(SwipeToDismissBoxValue.Settled)
         }
     }
 
-    // Solo ejecutamos onDelete si el estado cambia a EndToStart
-    LaunchedEffect(key1 = dismissState.targetValue) {
+    LaunchedEffect(dismissState.targetValue) {
         if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) {
             onDeleteTask(task)
-            dismissState.snapTo(targetValue = SwipeToDismissBoxValue.Settled)
+            dismissState.snapTo(SwipeToDismissBoxValue.Settled)
         }
     }
 
@@ -166,18 +208,17 @@ fun TaskCardSwipe(
     ) {
         TaskCard(
             task = task,
-            onCheckedChange = { newState ->
-                onTaskCheckedChange(task, newState)
-            },
+            onCheckedChange = { onTaskCheckedChange(task, it) },
             onTaskClick = onTaskClick
         )
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DismissBackground(dismissState: SwipeToDismissBoxState) {
     val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-        Color.Red
+        MaterialTheme.colorScheme.errorContainer
     } else {
         Color.Transparent
     }
@@ -185,10 +226,17 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .clip(MaterialTheme.shapes.large)
             .background(color)
-            .padding(all = 16.dp),
+            .padding(horizontal = 24.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.White)
+        if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+            Icon(
+                imageVector = Icons.Default.DeleteOutline,
+                contentDescription = "Eliminar",
+                tint = MaterialTheme.colorScheme.error
+            )
+        }
     }
 }
