@@ -9,13 +9,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
@@ -71,17 +78,34 @@ fun DashboardMainScreen(
 
 @Composable
 fun MainProgressCard(progress: Float) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        color = MaterialTheme.colorScheme.primaryContainer,
         shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(modifier = Modifier.padding(all = 24.dp)) {
-            Text(
-                text = "Progreso Diario",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text(
+                    text = "Progreso Diario",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                // Chip de porcentaje
+                SuggestionChip(
+                    onClick = { },
+                    label = { Text("${(progress * 100).toInt()}%") },
+                    shape = CircleShape,
+                    colors = SuggestionChipDefaults.suggestionChipColors(
+                        labelColor = Color.White
+                    )
+                )
+            }
 
             Spacer(modifier = Modifier.height(height = 16.dp))
 
@@ -98,7 +122,7 @@ fun MainProgressCard(progress: Float) {
             Spacer(modifier = Modifier.height(height = 8.dp))
 
             Text(
-                "${(progress * 100).toInt()}% completado",
+                text = if (progress >= 1f) "¡Todas las tareas completadas! 🎉" else "Casi llegas a tu meta de hoy",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium
             )
