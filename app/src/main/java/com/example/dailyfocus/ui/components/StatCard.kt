@@ -14,7 +14,6 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.PendingActions
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -27,7 +26,11 @@ import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.dailyfocus.data.model.DashboardState
 import com.example.dailyfocus.data.model.StatItem
+import com.example.dailyfocus.data.model.Task
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 
 @Composable
 fun StatCard(
@@ -36,7 +39,7 @@ fun StatCard(
 ) {
     // Defino iconos y colores basados en el título
     val (icon, color) = when (stat.title) {
-        "Total tareas" -> Icons.AutoMirrored.Filled.List to MaterialTheme.colorScheme.primary
+        "Total tareas"-> Icons.AutoMirrored.Filled.List to MaterialTheme.colorScheme.primary
         "Completadas" -> Icons.Default.CheckCircle to Color(0xFF4CAF50)
         "Pendientes" -> Icons.Default.PendingActions to Color(0xFFFF9800)
         else -> Icons.AutoMirrored.Filled.List to MaterialTheme.colorScheme.secondary
@@ -77,7 +80,7 @@ fun StatCard(
 
             Column {
                 Text(
-                    text = stat.value,
+                    text = stat.value.toString(),
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontWeight = Bold,
                         fontSize = 28.sp
@@ -101,7 +104,7 @@ fun DashboardPreview() {
     StatCard(
         stat = StatItem(
             title = "Tareas completadas",
-            value = "10"
+            value = 10
         )
     )
 }

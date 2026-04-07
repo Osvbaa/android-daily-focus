@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -37,7 +36,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TaskCard(
     task: Task,
-    onCheckedChange: (Boolean) -> Unit,
+    onCheckedChange: (String) -> Unit,
     onTaskClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -71,7 +70,7 @@ fun TaskCard(
         ) {
             Checkbox(
                 checked = task.isCompleted,
-                onCheckedChange = onCheckedChange,
+                onCheckedChange = { onCheckedChange(task.id) },
                 colors = CheckboxDefaults.colors(
                     checkedColor = MaterialTheme.colorScheme.primary,
                     uncheckedColor = MaterialTheme.colorScheme.outline

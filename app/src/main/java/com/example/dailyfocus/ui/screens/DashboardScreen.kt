@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
@@ -21,24 +19,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
+import com.example.dailyfocus.data.model.DashboardState
 import com.example.dailyfocus.data.model.StatItem
 import com.example.dailyfocus.ui.components.StatCard
 
 @Composable
 fun DashboardMainScreen(
-    stats: List<StatItem>,
+    stats: DashboardState,
     modifier: Modifier = Modifier
 ) {
-    val total = stats.find { statTitle -> statTitle.title == "Total tareas" }?.value?.toIntOrNull() ?: 1
-    val completed = stats.find { statTitle -> statTitle.title == "Completadas" }?.value?.toIntOrNull() ?: 0
-    val progress = if (total > 0) completed.toFloat() / total else 0f
-
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -55,7 +48,11 @@ fun DashboardMainScreen(
 
         // Gráfico de progreso general
         item {
-            MainProgressCard(progress = progress)
+            MainProgressCard(
+                successPercentage = stats.progress,
+                progressText = stats.progressText,
+                message = stats.message
+            )
         }
 
         // Cuadrícula de estadisticas
@@ -64,20 +61,19 @@ fun DashboardMainScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                stats.filter { statTitle -> statTitle.title != "Total tareas" }.forEach { stat ->
-                    StatCard(stat = stat, modifier = Modifier.weight(1f))
-                }
+                StatCard(stat = StatItem(title = "Completadas", value = stats.tasksCompleted), modifier = Modifier.weight(1f))
+                StatCard(stat = StatItem(title = "Pendientes", value = stats.tasksPending), modifier = Modifier.weight(1f))
             }
         }
 
         item {
-            StatCard(stat = stats.first { statTitle -> statTitle.title == "Total tareas" })
+            StatCard(stat = StatItem(title = "Total tareas ", value = stats.totalTasks))
         }
     }
 }
 
 @Composable
-fun MainProgressCard(progress: Float) {
+fun MainProgressCard(successPercentage: Float, progressText: String, message: String) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.primaryContainer,
@@ -98,11 +94,11 @@ fun MainProgressCard(progress: Float) {
 
                 // Chip de porcentaje
                 SuggestionChip(
-                    onClick = { },
-                    label = { Text("${(progress * 100).toInt()}%") },
+                    onClick = {},
+                    label = { Text(progressText) },
                     shape = CircleShape,
                     colors = SuggestionChipDefaults.suggestionChipColors(
-                        labelColor = Color.White
+                        labelColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 )
             }
@@ -110,7 +106,7 @@ fun MainProgressCard(progress: Float) {
             Spacer(modifier = Modifier.height(height = 16.dp))
 
             LinearProgressIndicator(
-                progress = { progress },
+                progress = { successPercentage },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(12.dp),
@@ -122,7 +118,7 @@ fun MainProgressCard(progress: Float) {
             Spacer(modifier = Modifier.height(height = 8.dp))
 
             Text(
-                text = if (progress >= 1f) "¡Todas las tareas completadas! 🎉" else "Casi llegas a tu meta de hoy",
+                text = message,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium
             )

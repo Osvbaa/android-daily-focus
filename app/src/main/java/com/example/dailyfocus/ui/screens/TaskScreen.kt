@@ -47,12 +47,14 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun TaskScreen(
-    tasks: MutableList<Task>,
+    tasks: ImmutableList<Task>,
     onDeleteTask: (Task) -> Unit,
     onTaskClick: (String) -> Unit,
+    onCheckedChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val groupedTasks by remember {
+    // Añadimos 'tasks' como llave del remember para que se actualice al cambiar los datos
+    val groupedTasks by remember(key1 = tasks) {
         derivedStateOf {
             tasks.groupBy { task ->
                 task.createdAt.format(DateTimeFormatter.ofPattern("EEEE, d MMMM"))
@@ -64,12 +66,7 @@ fun TaskScreen(
 
     TaskList(
         groupedTasks = groupedTasks,
-        onTaskCheckedChange = { task, isChecked ->
-            val index = tasks.indexOfFirst { it.id == task.id }
-            if (index != -1) {
-                tasks[index] = tasks[index].copy(isCompleted = isChecked)
-            }
-        },
+        onCheckedChange = onCheckedChange,
         onDeleteTask = onDeleteTask,
         onTaskClick = onTaskClick,
         modifier = modifier
@@ -80,7 +77,7 @@ fun TaskScreen(
 @Composable
 private fun TaskList(
     groupedTasks: ImmutableMap<String, ImmutableList<Task>>,
-    onTaskCheckedChange: (Task, Boolean) -> Unit,
+    onCheckedChange: (String) -> Unit,
     onDeleteTask: (Task) -> Unit,
     onTaskClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -107,7 +104,7 @@ private fun TaskList(
             ) { task ->
                 TaskCardSwipe(
                     task = task,
-                    onTaskCheckedChange = onTaskCheckedChange,
+                    onCheckedChange = onCheckedChange,
                     onDeleteTask = onDeleteTask,
                     onTaskClick = onTaskClick,
                     modifier = Modifier.animateItem()
@@ -158,7 +155,7 @@ private fun DateHeader(date: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(color = MaterialTheme.colorScheme.surface)
             .padding(vertical = 8.dp)
     ) {
         Text(
@@ -179,7 +176,7 @@ private fun DateHeader(date: String) {
 @Composable
 fun TaskCardSwipe(
     task: Task,
-    onTaskCheckedChange: (Task, Boolean) -> Unit,
+    onCheckedChange: (String) -> Unit,
     onDeleteTask: (Task) -> Unit,
     onTaskClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -208,7 +205,7 @@ fun TaskCardSwipe(
     ) {
         TaskCard(
             task = task,
-            onCheckedChange = { onTaskCheckedChange(task, it) },
+            onCheckedChange = { onCheckedChange(task.id) },
             onTaskClick = onTaskClick
         )
     }
