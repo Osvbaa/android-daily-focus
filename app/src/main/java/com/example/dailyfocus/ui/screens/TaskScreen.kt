@@ -50,7 +50,7 @@ fun TaskScreen(
     tasks: ImmutableList<Task>,
     onDeleteTask: (Task) -> Unit,
     onTaskClick: (String) -> Unit,
-    onCheckedChange: (String) -> Unit,
+    onCheckedChange: (Task) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Añadimos 'tasks' como llave del remember para que se actualice al cambiar los datos
@@ -77,7 +77,7 @@ fun TaskScreen(
 @Composable
 private fun TaskList(
     groupedTasks: ImmutableMap<String, ImmutableList<Task>>,
-    onCheckedChange: (String) -> Unit,
+    onCheckedChange: (Task) -> Unit,
     onDeleteTask: (Task) -> Unit,
     onTaskClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -176,7 +176,7 @@ private fun DateHeader(date: String) {
 @Composable
 fun TaskCardSwipe(
     task: Task,
-    onCheckedChange: (String) -> Unit,
+    onCheckedChange: (Task) -> Unit,
     onDeleteTask: (Task) -> Unit,
     onTaskClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -205,7 +205,7 @@ fun TaskCardSwipe(
     ) {
         TaskCard(
             task = task,
-            onCheckedChange = { onCheckedChange(task.id) },
+            onCheckedChange = { onCheckedChange(task) },
             onTaskClick = onTaskClick
         )
     }

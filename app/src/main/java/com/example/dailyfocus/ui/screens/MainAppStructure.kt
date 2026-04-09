@@ -28,12 +28,13 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.dailyfocus.ui.navigation.DashboardRoute
 import com.example.dailyfocus.ui.navigation.TaskDetailRoute
+import com.example.dailyfocus.ui.viewmodel.AppViewModelProvider
 import com.example.dailyfocus.ui.viewmodel.TaskViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainAppStructure(
-    viewModel: TaskViewModel = viewModel()
+    viewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     // 1. "Sintonizamos la radio" para recibir los datos del Chef
     val tasks by viewModel.tasks.collectAsStateWithLifecycle()
@@ -103,12 +104,15 @@ fun MainAppStructure(
                         NavEntry(key) {
                             TaskScreen(
                                 tasks = tasks,
-                                onDeleteTask = { taskToDelete -> viewModel.deleteTask(taskId = taskToDelete.id) },
+                                onDeleteTask = { taskToDelete ->
+                                    viewModel.deleteTask(taskId = taskToDelete.id)
+
+                                },
                                 onTaskClick = { clickedTaskId ->
                                     backStack.add(TaskDetailRoute(taskId = clickedTaskId))
                                 },
-                                onCheckedChange = { taskId ->
-                                    viewModel.toggleTaskCompletion(taskId = taskId)
+                                onCheckedChange = { task ->
+                                    viewModel.toggleTaskCompletion(task = task)
                                 }
                             )
                         }
