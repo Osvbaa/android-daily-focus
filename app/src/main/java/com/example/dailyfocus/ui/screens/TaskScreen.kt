@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.dailyfocus.data.model.Task
+import com.example.dailyfocus.data.model.TaskUiItem
 import com.example.dailyfocus.ui.components.TaskCard
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -47,23 +48,12 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun TaskScreen(
-    tasks: ImmutableList<Task>,
+    groupedTasks: ImmutableMap<String, ImmutableList<TaskUiItem>>,
     onDeleteTask: (Task) -> Unit,
     onTaskClick: (String) -> Unit,
     onCheckedChange: (Task) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Añadimos 'tasks' como llave del remember para que se actualice al cambiar los datos
-    val groupedTasks by remember(key1 = tasks) {
-        derivedStateOf {
-            tasks.groupBy { task ->
-                task.createdAt.format(DateTimeFormatter.ofPattern("EEEE, d MMMM"))
-            }
-                .mapValues { it.value.toImmutableList() }
-                .toImmutableMap()
-        }
-    }
-
     TaskList(
         groupedTasks = groupedTasks,
         onCheckedChange = onCheckedChange,
@@ -76,7 +66,7 @@ fun TaskScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TaskList(
-    groupedTasks: ImmutableMap<String, ImmutableList<Task>>,
+    groupedTasks: ImmutableMap<String, ImmutableList<TaskUiItem>>,
     onCheckedChange: (Task) -> Unit,
     onDeleteTask: (Task) -> Unit,
     onTaskClick: (String) -> Unit,
@@ -99,11 +89,12 @@ private fun TaskList(
 
             items(
                 items = tasksForDate,
-                key = { it.id },
+                key = { it.task.id },
                 contentType = { "task_item" }
-            ) { task ->
+            ) { item ->
                 TaskCardSwipe(
-                    task = task,
+                    task = item.task,
+                    formattedTime = item.formattedTime,
                     onCheckedChange = onCheckedChange,
                     onDeleteTask = onDeleteTask,
                     onTaskClick = onTaskClick,
@@ -137,8 +128,8 @@ private fun HeaderSection() {
         Box(
             modifier = Modifier
                 .size(48.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.primaryContainer),
+                .clip(shape = MaterialTheme.shapes.medium)
+                .background(color = MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -149,7 +140,6 @@ private fun HeaderSection() {
         }
     }
 }
-
 @Composable
 private fun DateHeader(date: String) {
     Box(
@@ -159,7 +149,7 @@ private fun DateHeader(date: String) {
             .padding(vertical = 8.dp)
     ) {
         Text(
-            text = date.replaceFirstChar { it.uppercase() },
+            text = date,
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
@@ -176,6 +166,7 @@ private fun DateHeader(date: String) {
 @Composable
 fun TaskCardSwipe(
     task: Task,
+    formattedTime: String,
     onCheckedChange: (Task) -> Unit,
     onDeleteTask: (Task) -> Unit,
     onTaskClick: (String) -> Unit,
@@ -206,6 +197,7 @@ fun TaskCardSwipe(
         TaskCard(
             task = task,
             onCheckedChange = { onCheckedChange(task) },
+            formattedTime = formattedTime,
             onTaskClick = onTaskClick
         )
     }

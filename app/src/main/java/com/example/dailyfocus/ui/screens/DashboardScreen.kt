@@ -38,6 +38,7 @@ fun DashboardMainScreen(
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
+        // Título de la pantalla de estadísticas
         item {
             Spacer(modifier = Modifier.height(height = 24.dp))
             Text(
@@ -84,7 +85,7 @@ fun MainProgressCard(successPercentage: Float, progressText: String, message: St
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 Text(
                     text = "Progreso Diario",
                     style = MaterialTheme.typography.titleMedium,

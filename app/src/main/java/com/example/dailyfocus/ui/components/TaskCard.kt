@@ -31,15 +31,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dailyfocus.data.model.Task
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun TaskCard(
     task: Task,
     onCheckedChange: (String) -> Unit,
     onTaskClick: (String) -> Unit,
+    formattedTime: String,
     modifier: Modifier = Modifier
 ) {
+    val isCompleted = task.isCompleted
+
     val containerColor by animateColorAsState(
         targetValue = if (task.isCompleted) {
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
@@ -50,7 +52,8 @@ fun TaskCard(
         label = "containerColor"
     )
 
-    val contentAlpha = if (task.isCompleted) 0.6f else 1f
+    val textDecoration = if (isCompleted) TextDecoration.LineThrough else null
+    val contentAlpha = if (isCompleted) 0.6f else 1f
 
     OutlinedCard(
         modifier = modifier
@@ -60,7 +63,7 @@ fun TaskCard(
         colors = CardDefaults.outlinedCardColors(
             containerColor = containerColor
         ),
-        border = CardDefaults.outlinedCardBorder(enabled = !task.isCompleted)
+        border = CardDefaults.outlinedCardBorder(enabled = task.isCompleted.not())
     ) {
         Row(
             modifier = Modifier
@@ -89,14 +92,14 @@ fun TaskCard(
                     text = task.title,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null
+                        textDecoration = textDecoration
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                if (!task.description.isNullOrBlank()) {
+                if (task.description.isNullOrBlank().not()) {
                     Text(
                         text = task.description,
                         style = MaterialTheme.typography.bodyMedium,
@@ -117,7 +120,7 @@ fun TaskCard(
                         tint = MaterialTheme.colorScheme.outline
                     )
                     Text(
-                        text = task.createdAt.format(DateTimeFormatter.ofPattern("HH:mm")),
+                        text = formattedTime,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                         letterSpacing = 0.5.sp

@@ -1,7 +1,7 @@
 package com.example.dailyfocus
 
 import android.app.Application
-import com.example.dailyfocus.data.AppContainer
+import com.example.dailyfocus.data.DailyFocusAppContainer
 import com.example.dailyfocus.data.DefaultAppContainer
 
 /**
@@ -12,12 +12,11 @@ class DailyFocusApplication : Application() {
 
     // El contenedor que guarda nuestras herramientas (repositorios)
     // Usamos 'lateinit' porque lo inicializaremos en el onCreate()
-    lateinit var container: AppContainer
+    lateinit var container: DailyFocusAppContainer
 
     override fun onCreate() {
         super.onCreate()
 
-        // ¡Aquí ocurre la magia!
         // Instanciamos el contenedor una sola vez para toda la vida de la app.
         container = DefaultAppContainer()
     }

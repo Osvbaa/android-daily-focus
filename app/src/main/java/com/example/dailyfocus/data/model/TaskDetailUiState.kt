@@ -1,4 +1,7 @@
 package com.example.dailyfocus.data.model
 
-class TaskDetailUiState {
-}
+data class TaskDetailUiState(
+    val title: String,
+    val description: String,
+    val isCompleted: Boolean
+)

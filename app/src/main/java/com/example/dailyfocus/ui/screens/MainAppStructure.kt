@@ -1,5 +1,7 @@
 package com.example.dailyfocus.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -29,35 +32,16 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.dailyfocus.ui.navigation.DashboardRoute
 import com.example.dailyfocus.ui.navigation.TaskDetailRoute
 import com.example.dailyfocus.ui.viewmodel.AppViewModelProvider
+import com.example.dailyfocus.ui.viewmodel.DashboardViewModel
+import com.example.dailyfocus.ui.viewmodel.TaskDetailViewModel
 import com.example.dailyfocus.ui.viewmodel.TaskViewModel
-
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainAppStructure(
-    viewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
-) {
-    // 1. "Sintonizamos la radio" para recibir los datos del Chef
-    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
-    val dashboardStats by viewModel.stats.collectAsStateWithLifecycle()
-
+fun MainAppStructure() {
+    // 1. Sintonizamos el flujo de Items de UI (que ya traen la fecha formateada)
     val snackbarHostState = remember { SnackbarHostState() } // Estado para el Snackbar
-
-    // Estado para la pantalla actual utilizando Navigation
-    val backStack = rememberNavBackStack(TaskRoute)
-
-    // 2. ESCUCHAMOS LOS EVENTOS (SharedFlow)
-    // Cuando el Chef diga "Tarea eliminada", el Mesero muestra el Snackbar
-    LaunchedEffect(key1 = Unit) {
-        viewModel.uiEvent.collect { message ->
-            val result = snackbarHostState.showSnackbar(
-                message = message,
-                actionLabel = "Deshacer"
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                viewModel.undoDelete()
-            }
-        }
-    }
+    val backStack = rememberNavBackStack(TaskRoute) // Estado para la pantalla actual utilizando Navigation
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -95,41 +79,93 @@ fun MainAppStructure(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(paddingValues = innerPadding)) {
-            
             NavDisplay(
                 backStack = backStack,
             ) { key ->
                 when(key) {
                     is TaskRoute ->
                         NavEntry(key) {
+                            val viewModel: TaskViewModel = viewModel(factory = AppViewModelProvider.Factory)
+                            val groupedTasks by viewModel.groupedTasks.collectAsStateWithLifecycle()
+
+                            // 2. ESCUCHAMOS LOS EVENTOS (SharedFlow)
+                            // Cuando el Chef diga "Tarea eliminada", el Mesero muestra el Snackbar
+                            LaunchedEffect(key1 = Unit) {
+                                viewModel.uiEvent.collect { message ->
+                                    val result = snackbarHostState.showSnackbar(
+                                        message = message,
+                                        actionLabel = "Deshacer"
+                                    )
+                                    if (result == SnackbarResult.ActionPerformed) {
+                                        viewModel.undoDelete()
+                                    }
+                                }
+                            }
+
                             TaskScreen(
-                                tasks = tasks,
                                 onDeleteTask = { taskToDelete ->
                                     viewModel.deleteTask(taskId = taskToDelete.id)
-
                                 },
                                 onTaskClick = { clickedTaskId ->
                                     backStack.add(TaskDetailRoute(taskId = clickedTaskId))
                                 },
                                 onCheckedChange = { task ->
                                     viewModel.toggleTaskCompletion(task = task)
-                                }
+                                },
+                                groupedTasks = groupedTasks
                             )
                         }
                     is DashboardRoute ->
                         NavEntry(key) {
+                            val viewModel: DashboardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+                            val dashboardStats by viewModel.stats.collectAsStateWithLifecycle()
                             DashboardMainScreen(stats = dashboardStats)
                         }
                     is TaskDetailRoute ->
                         NavEntry(key) {
-                            TaskDetailScreen(taskId = key.taskId) {
-                                backStack.removeLastOrNull()
+                            val viewModel: TaskDetailViewModel = viewModel(
+                                key = key.taskId,
+                                factory = AppViewModelProvider.factoryForTaskDetail(key.taskId)
+                            )
+
+                            LaunchedEffect(key1 = key.taskId) {
+                                viewModel.refresh()
                             }
+                            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                            val canSave by viewModel.isEntryValid.collectAsStateWithLifecycle()
+
+                            TaskDetailScreen(
+                                title = uiState.title,
+                                description = uiState.description,
+                                isCompleted = uiState.isCompleted,
+                                isSaveEnabled = canSave,
+                                onValueChangeTitle = { newTitle ->
+                                    viewModel.onValueChangeTitle(newTitle = newTitle) },
+                                onValueChangeDescription = { newDescription ->
+                                    viewModel.onValueChangeDescription(newDescription = newDescription)
+                                },
+                                onToggleCompleted = { isCompleted ->
+                                    viewModel.onToggleCompleted(completed = isCompleted)
+                                },
+                                onSaveTaskChanges = {
+                                    if (canSave) {
+                                        viewModel.onSaveTaskChanges()
+                                        backStack.removeLast()
+                                    }
+                                },
+                                onNavigateBack = {
+                                    if (backStack.size > 1) backStack.removeLast()
+                                }
+                            )
                         }
                     else -> error("Unknown key $key")
                 }
             }
-            /*
+        }
+    }
+}
+
+/*
             Navigation 2
             NavHost(
                 navController = navController,
@@ -179,6 +215,3 @@ fun MainAppStructure(
                     }
                 }
             }*/
-        }
-    }
-}

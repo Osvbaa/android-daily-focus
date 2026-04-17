@@ -3,6 +3,7 @@ package com.example.dailyfocus.data.model
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 
+// data class con el estado de la pantalla de estadisticas
 data class DashboardState(
     val stats: PersistentList<StatItem> = persistentListOf(),
     val totalTasks: Int = 0,

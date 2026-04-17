@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.update
 
 class InMemoryTaskRepository : TaskRepository {
     // A. LA FUENTE DE DATOS (Privada)
-    private val _tasks = MutableStateFlow(
+    private val tasks = MutableStateFlow(
         value = persistentListOf(
             Task(title = "Aprender LazyLayouts", description = "Entender keys"),
             Task(title = "Refactorizar Daily Focus", isCompleted = true),
@@ -24,29 +24,28 @@ class InMemoryTaskRepository : TaskRepository {
             Task(title = "Limpiar el cuarto", isCompleted = true)
         )
     )
-
     // B. FUNCIONES DE LECTURA (Implementando la interfaz)
-    override fun getTasksStream() = _tasks.asStateFlow()
+    override fun getTasksStream() = tasks.asStateFlow()
 
     // C. FUNCIONES DE ESCRITURA
     override suspend fun insertTask(task: Task) {
-        _tasks.update { list -> list.add(task) }
+        tasks.update { list -> list.add(task) }
     }
 
     override suspend fun deleteTask(taskId: String) {
-        _tasks.update { list ->
+        tasks.update { list ->
             list.removeAll { task -> task.id == taskId }
         }
     }
 
     override suspend fun updateTask(task: Task) {
-        _tasks.update { list ->
+        tasks.update { list ->
             list.map { if (it.id == task.id) task else it }.toPersistentList()
         }
     }
 
     override suspend fun restoreTask(index: Int, task: Task) {
-        _tasks.update { list ->
+        tasks.update { list ->
             list.add(index, element = task)
         }
     }
