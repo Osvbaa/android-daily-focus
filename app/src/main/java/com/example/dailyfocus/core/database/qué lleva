@@ -1,0 +1,1 @@
+Configuración de base de datos local (Room/SQLDelight), entidades globales y DAOs debería contener solo la clase AppDatabase.kt y el builder.
