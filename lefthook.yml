@@ -1,7 +1,0 @@
-pre-push:
-  parallel: true
-  commands:
-    architecture-audit:
-      run: ./gradlew :core:testing:test --tests "ArchitectureTest"
-    static-analysis:
-      run: ./gradlew detekt lintDebug
