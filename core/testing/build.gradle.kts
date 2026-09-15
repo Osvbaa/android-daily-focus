@@ -1,26 +1,18 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    id("dailyfocus.android.library")
 }
 
 android {
     namespace = "com.example.dailyfocus.core.testing"
-    compileSdk = 37
-
-    defaultConfig {
-        minSdk = 26
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
 }
 
 dependencies {
-    implementation(project(":core:common"))
-    implementation(libs.junit)
-    implementation(libs.androidx.junit)
+    api(projects.core.model)
+    api(projects.core.common)
+    api(projects.core.data)
+    api(libs.junit)
+    api(libs.kotlinx.coroutines.test)
+    api(libs.kotlinx.collections.immutable)
+    testImplementation(libs.konsist)
+    implementation(libs.kotlinx.coroutines.core)
 }

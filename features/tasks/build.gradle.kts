@@ -1,30 +1,32 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    id("dailyfocus.android.feature")
+    alias(libs.plugins.roborazzi)
 }
 
 android {
     namespace = "com.example.dailyfocus.features.tasks"
-    compileSdk = 37
 
-    defaultConfig {
-        minSdk = 26
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            it.jvmArgs("--add-exports=java.base/jdk.internal.access=ALL-UNNAMED")
+        }
     }
 }
 
 dependencies {
-    implementation(project(":core:common"))
-    implementation(project(":core:designsystem"))
-    implementation(libs.androidx.core-ktx)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.kotlinx.collections.immutable)
+    testImplementation(projects.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.junit)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.junit.rule)
+    testImplementation(libs.robolectric)
+}
+
+roborazzi {
+    outputDir.set(file("src/test/screenshots"))
 }

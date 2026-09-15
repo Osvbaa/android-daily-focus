@@ -60,5 +60,16 @@ Feature: Gestión y Captura Rápida de Tareas (MUST)
     And el usuario regresa a la aplicación
     Then el texto "Borrador de tarea importante" permanece en el campo de entrada
 
+  Scenario: Completar un padre con subtareas pendientes
+    Given una tarea contiene subtareas pendientes
+    When el usuario intenta completar la tarea padre
+    Then no se persiste ningún cambio
+    And se ofrecen las acciones "Ver subtareas" y "Completar todas"
+
+  Scenario: Guardar subtareas ordenadas de un nivel
+    Given el usuario edita una tarea sin escribir todavía en Room
+    When añade, edita y reordena subtareas y pulsa "Guardar"
+    Then la tarea y sus subtareas se persisten atómicamente con posiciones consecutivas
+
  
   

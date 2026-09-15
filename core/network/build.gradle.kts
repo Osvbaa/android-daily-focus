@@ -1,25 +1,20 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    id("dailyfocus.android.library")
+    id("dailyfocus.android.hilt")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
     namespace = "com.example.dailyfocus.core.network"
-    compileSdk = 37
-
-    defaultConfig {
-        minSdk = 26
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
 }
 
 dependencies {
-    implementation(project(":core:common"))
+    implementation(projects.core.common)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.kotlinx.serialization.json)
 }

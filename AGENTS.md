@@ -31,7 +31,7 @@ Keep the change within the smallest possible blast radius.
 - Do not modify or weaken tests simply to make an implementation pass.
 
 ### 5. Respect persistence boundaries
-- `:core:database` owns the single `AppDatabase`. Features consume only the DAOs they require through dependency injection.
+- `:core:database` owns the single `AppDatabase`. Features consume repository interfaces from `:core:data` through dependency injection; only the data layer consumes DAOs (ADR-012).
 - Never create another application database. Do not use destructive migrations in production.
 - Follow the persistence decisions defined in `docs/adr/`.
 
@@ -66,11 +66,17 @@ Follow existing conventions. Keep changes focused. Preserve module boundaries. A
 ### Before finishing
 ```bash
 ./gradlew testDebugUnitTest
-./gradlew :core:testing:test --tests "ArchitectureTest"
+./gradlew :core:testing:testDebugUnitTest --tests "*ArchitectureGuardrailsTest"
 ./gradlew detekt lintDebug
 ./gradlew buildHealth
+./gradlew :features:tasks:verifyRoborazziDebug
 ```
 If a required check fails, the task is **not complete**.
+
+The recommended local quality contract is `./gradlew checkQuality`. It aggregates
+detekt, dependency analysis (`buildHealth`), debug lint, unit tests, Konsist
+architecture guardrails, and Roborazzi verification. Screenshot goldens are
+updated only explicitly with `recordRoborazziDebug`; CI runs verification only.
 
 ---
 

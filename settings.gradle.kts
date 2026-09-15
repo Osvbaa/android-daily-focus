@@ -1,19 +1,21 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google()
         mavenCentral()
         gradlePluginPortal()
     }
 }
+
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    id("com.android.application") version "9.4.0" apply false
+    id("com.android.library") version "9.4.0" apply false
+    id("org.jetbrains.kotlin.jvm") version "2.4.20" apply false
+    id("com.autonomousapps.build-health") version "3.19.1"
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -22,6 +24,26 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Daily Focus"
+rootProject.name = "DailyFocus"
+
 include(":app")
- 
+include(":ai")
+include(":sync")
+include(":integrations:google")
+
+include(":core:model")
+include(":core:common")
+include(":core:designsystem")
+include(":core:database")
+include(":core:data")
+include(":core:network")
+include(":core:analytics")
+include(":core:testing")
+
+include(":features:calendar")
+include(":features:dashboard")
+include(":features:focustimer")
+include(":features:habits")
+include(":features:projects")
+include(":features:tasks")
+include(":core:ui")

@@ -14,6 +14,8 @@ fun AppNavigation(
     snackbarHostState: SnackbarHostState
 ) {
     NavDisplay(backStack = backStack) { key ->
-        taskNavGraph(key, backStack, snackbarHostState) ?: dashboardNavGraph(key)
+        taskNavGraph(key, backStack, snackbarHostState)
+            ?: dashboardNavGraph(key)
+            ?: error("Unknown key: $key")
     }
 }
