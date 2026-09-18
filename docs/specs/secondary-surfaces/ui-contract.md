@@ -1,0 +1,3 @@
+# Contrato UI: Calendario y Dashboard
+
+El propietario implementa los visuales. Calendario muestra la fecha elegida y sus tareas; emite `CalendarEvent.DateSelected(epochDay)` y `TodayRequested`. Conectar esos eventos desde `calendarNavGraph` cuando se renueve Compose. Sustituir el título y vacío fijos «hoy» por textos relativos a `state.epochDay`; mostrar carga y error. La selección se restaura desde `SavedStateHandle`. Dashboard muestra actividad y progreso derivados de repositorios, con estados vacío/carga/error sin cifras ficticias. Navegación mediante IDs y fechas primitivas. Probar SURFACE-01 a SURFACE-03 con UI cuando esté lista.

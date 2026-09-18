@@ -1,0 +1,42 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+config:
+  validation: true
+
+complexity:
+  LongMethod:
+    active: false
+  LongParameterList:
+    active: false
+  TooManyFunctions:
+    active: false
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
+
+style:
+  ExplicitItLambdaParameter:
+    active: false
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  WildcardImport:
+    active: false
+  NewLineAtEndOfFile:
+    active: false
+
+naming:
+  MatchingDeclarationName:
+    active: false
+  # Compose functions are conventionally PascalCase and are covered by the
+  # Compose compiler/lint checks instead of the JVM naming rule.
+  FunctionNaming:
+    active: false
+
+empty-blocks:
+  EmptyElseBlock:
+    active: false

@@ -1,0 +1,3 @@
+# Contrato UI: Notas
+
+El propietario implementa los visuales. Lista y editor exponen carga, contenido, nota ausente, borrador, guardado y error. Eventos: editar título/cuerpo, guardar, borrar, volver, solicitar extracción y confirmar/cancelar sugerencias seleccionadas. Confirmar desde nota nueva debe tener resultado definido por NOTE-02 antes de construir la interacción. El origen se comunica a Tareas mediante `noteId` primitivo. El editor debe seguir funcionando sin IA; error o descarga de modelo no impiden guardar. Al probar UI, cubrir recreación, teclado/IME, foco, accesibilidad, y no crear tareas al cancelar.

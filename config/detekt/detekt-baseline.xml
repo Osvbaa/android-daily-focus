@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>FunctionNaming:Theme.kt$@Composable fun DailyFocusTheme( darkTheme: Boolean = isSystemInDarkTheme(), dynamicColor: Boolean = true, content: @Composable () -&gt; Unit )</ID>
+    <ID>FunctionNaming:NoteSnippetCard.kt$@Composable fun NoteSnippetCard( note: Note, onClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:TaskItemCard.kt$@Composable fun TaskItemCard( task: Task, onToggleCompletion: (Boolean) -&gt; Unit, onOpenTriageMenu: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:AppNavigation.kt$@Composable fun AppNavigation( backStack: NavBackStack&lt;NavKey&gt;, snackbarHostState: SnackbarHostState )</ID>
+    <ID>FunctionNaming:MainAppStructure.kt$@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM) @OptIn(ExperimentalMaterial3Api::class) @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter") @Composable fun MainAppStructure()</ID>
+    <ID>NewLineAtEndOfFile:DailyFocusApplication.kt$com.example.dailyfocus.app.DailyFocusApplication.kt</ID>
+    <ID>NewLineAtEndOfFile:ExampleUnitTest.kt$com.example.dailyfocus.ExampleUnitTest.kt</ID>
+    <ID>NewLineAtEndOfFile:MainActivity.kt$com.example.dailyfocus.app.MainActivity.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="17">
+      <module name="DailyFocus.core.analytics" target="21" />
+      <module name="DailyFocus.core.network" target="21" />
+      <module name="DailyFocus.integrations.google" target="21" />
+      <module name="DailyFocus.sync" target="21" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

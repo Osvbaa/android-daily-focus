@@ -1,0 +1,3 @@
+# Contrato UI: Tareas
+
+El propietario implementa los visuales. ViewModels entregan estados inmutables para lista, editor, recordatorio y nota de origen; la UI emite eventos de crear, editar, completar, deshacer, reprogramar y abrir origen. Una confirmación exitosa debe reflejarse al volver a Mi Día sin pasar objetos por rutas: solo `taskId`/`noteId` primitivos. Expresar vacío, carga, error, permiso de notificación denegado y borrador recuperado. Prioridad se distingue también por etiqueta/semántica, no únicamente color. Deshacer debe preservar el tiempo y estado del dato subyacente. Probar TASK-01 a TASK-05 con ViewModel y, cuando se implemente la UI, Compose e instrumentación.

@@ -1,0 +1,3 @@
+# Contrato UI: Mi Día
+
+El propietario implementa los visuales. El ViewModel expone tareas vencidas y de hoy, proyectos activos relacionados, hábitos programados y estados de captura rápida. Mostrar valores reales también cuando estén vacíos; retirar el fallback 8/3/2 y las rachas de ejemplo de `TodayScreen.kt` al renovar la UI. Eventos de completar, crear, expandir panel y navegar emiten efectos con IDs primitivos. Al regresar de otra pantalla, las observaciones de repositorio actualizan el resumen. Contemplar carga, error, ausencia de datos, back y accesibilidad de resúmenes. Probar TODAY-01 a TODAY-03, especialmente estado vacío con contadores cero.

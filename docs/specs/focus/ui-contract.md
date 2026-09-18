@@ -1,0 +1,3 @@
+# Contrato UI: Focus
+
+El propietario implementa los visuales. Estados: sin sesión, activa, pausada, completada, cancelada, decisión de objetivo pendiente y error del servicio. Eventos: iniciar con objetivo ID opcional, pausar, reanudar, terminar, **Confirmar objetivo** u **Omitir** después de llegar a cero. Ninguna acción implícita completa tarea/hábito. La solicitud pendiente reaparece después de reiniciar hasta que se resuelva. Reloj visible refleja el tiempo persistido, no un contador que se reinicie al recrear pantalla. Notificación y UI comparten repositorio. Describir permisos/limitaciones de background sin bloquear captura manual. Probar FOCUS-01 a FOCUS-03, muerte de proceso y reducción de movimiento.

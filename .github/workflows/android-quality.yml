@@ -1,0 +1,87 @@
+name: Android quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  unit-and-architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew testDebugUnitTest :core:testing:testDebugUnitTest --tests "*ArchitectureGuardrailsTest"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-reports
+          path: '**/build/test-results/**'
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager "platforms;android-37" "build-tools;37.0.0"
+      - run: ./gradlew detekt buildHealth lintDebug
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: static-analysis-reports
+          path: '**/build/reports/{detekt,lint,dependency-analysis}/**'
+
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager "platforms;android-37" "build-tools;37.0.0"
+      - run: ./gradlew :features:tasks:verifyRoborazziDebug
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roborazzi-reports
+          path: 'features/tasks/build/{reports,outputs}/**'
+
+  instrumentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager "platforms;android-37" "build-tools;37.0.0" "system-images;android-35;default;x86_64"
+      - run: ./gradlew :app:pixel2api35DebugAndroidTest
+
+  quality-gate:
+    if: always()
+    needs: [unit-and-architecture, static-analysis, screenshots, instrumentation]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any quality job failed
+        run: |
+          test "${{ needs.unit-and-architecture.result }}" = success
+          test "${{ needs.static-analysis.result }}" = success
+          test "${{ needs.screenshots.result }}" = success
+          test "${{ needs.instrumentation.result }}" = success
